@@ -1,0 +1,421 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using NodaTime;
+using NPOI.XSSF.UserModel;
+
+namespace CBS_and_DES_5._3
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //FileStream fs = File.Open("Data to CBS.xlsx", FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
+            var workbook = new XSSFWorkbook("Data to CBS.xlsx");
+            var sheet = workbook.GetSheet("This method");
+            List<Task> Task_pre = new List<Task>();
+            int Row = 85;
+
+            //从excel获取信息写入task中
+            for (int row = 1; row <= Row; row++)
+            {
+                var ID = sheet.GetRow(row).GetCell(0).ToString();
+                var name = sheet.GetRow(row).GetCell(3);
+                var dura_String = sheet.GetRow(row).GetCell(4).ToString();
+                var pre_str = sheet.GetRow(row).GetCell(5).ToString().Split(',');
+                var r_str = sheet.GetRow(row).GetCell(7).ToString();
+                var point_x = sheet.GetRow(row).GetCell(8).ToString();
+                var point_y = sheet.GetRow(row).GetCell(9).ToString();
+                Duration duration = Duration.FromMinutes(Convert.ToInt32(dura_String));
+
+                switch (name.ToString())
+                {
+                    case "Hoisting & installation":
+                        Task PCinstal = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "TC", "PCW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        PCinstal.Res_require.Add("TC", 1); PCinstal.Res_require.Add("PCW", 4);
+                        Task_pre.Add(PCinstal);
+                        break;
+                    case "Rebar hoisting":
+                        Task BarHoist = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },//这里还没写怎么把excel信息写进Point中
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "TC", "RW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        BarHoist.Res_require.Add("TC", 1); BarHoist.Res_require.Add("RW", 1);
+                        Task_pre.Add(BarHoist);
+                        break;
+                    case "Struts hoisting":
+                        Task StrutHoist = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },//这里还没写怎么把excel信息写进Point中
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "TC", "PCW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        StrutHoist.Res_require.Add("TC", 1); StrutHoist.Res_require.Add("PCW", 1);
+                        Task_pre.Add(StrutHoist);
+                        break;
+                    case "Forms Hoisting":
+                        Task FormHoist = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },//这里还没写怎么把excel信息写进Point中
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "TC", "F&SW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        FormHoist.Res_require.Add("TC", 1); FormHoist.Res_require.Add("F&SW", 4);
+                        Task_pre.Add(FormHoist);
+                        break;
+                    case "Grouting":
+                        Task Grouting = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },//这里还没写怎么把excel信息写进Point中
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "PW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        Grouting.Res_require.Add("PW", 1);
+                        Task_pre.Add(Grouting);
+                        break;
+                    case "Reinforceing":
+                        Task Reinforceing = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },//这里还没写怎么把excel信息写进Point中
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "RW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        Reinforceing.Res_require.Add("RW", 1);
+                        Task_pre.Add(Reinforceing);
+                        break;
+                    case "Formworking":
+                        Task Formworking = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },//这里还没写怎么把excel信息写进Point中
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "F&SW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        Formworking.Res_require.Add("F&SW", 2);
+                        Task_pre.Add(Formworking);
+                        break;
+                    case "Pouring":
+                        Task Pouring = new Task
+                        {
+                            ID = ID,
+                            D = duration,
+                            Point = new int[2] { Convert.ToInt32(point_x), Convert.ToInt32(point_y) },//这里还没写怎么把excel信息写进Point中
+                            Radius = Convert.ToInt32(r_str),
+                            Pre = pre_str,
+                            Pretask = new List<Task>(),
+                            Res_name = new string[] { "PW" },
+                            Res_require = new Dictionary<string, int>()
+                        };
+                        Pouring.Res_require.Add("PW", 3);
+                        Task_pre.Add(Pouring);
+                        break;
+                }
+            }
+
+            //将task的pressessor写入其属性中
+            foreach (var task in Task_pre)
+            {
+                if (task.Pre.All(p => p != null))
+                {
+                    foreach (string ID in task.Pre)
+                    {
+                        task.Pretask.Add(Task_pre.Where(y => y.ID == ID).FirstOrDefault());
+                    }
+
+                }
+                
+                
+            }
+
+            //CBS 方法
+            Instant Time0 = Instant.FromUtc(2020, 6, 20, 8, 0);
+            Duration step = Duration.FromMinutes(1);
+            Dictionary<string, int> Res = new Dictionary<string, int>
+            {
+                { "TC", 1 },
+                { "PCW", 4 },
+                { "RW", 3 },
+                { "F&SW", 4 },
+                { "PW", 3 } 
+            };//定义不同的资源及它们的数量
+            Dictionary<string, List<int>> Res_usage = new Dictionary<string, List<int>>
+            {
+                { "TC", new List<int>() },
+                { "PCW", new List<int>() },
+                { "RW", new List<int>() },
+                { "F&SW", new List<int>() },
+                { "PW", new List<int>() }
+            };//资源利用情况字典
+            int TCused; int PCWused; int RWused; int FSWused; int PWused;
+            Dictionary<string, List<string>> Res_time = new Dictionary<string, List<string>>
+            {
+                { "TC", new List<string>() },
+                { "PCW", new List<string>() },
+                { "RW", new List<string>() },
+                { "F&SW", new List<string>() },
+                { "PW", new List<string>() }
+            };//资源利用情况字典
+            List<Task> Task_on = new List<Task>(); 
+            List<Task> Task_end = new List<Task>();
+            //List<int> TC_usage = new List<int>();
+            //List<string> TC_time = new List<string>();
+
+            for (int i = 0; i < 5000; i++)
+            {
+                
+                if (Task_end.Count() == Row)
+                {
+                    break;
+                }
+                Instant TimeNow = Time0 + step * i;
+                //Console.WriteLine("{0}\\\\\\\\\\\\\\\\\\",TimeNow.ToString());
+                TCused = Res["TC"]; PCWused = Res["PCW"]; RWused = Res["RW"]; FSWused = Res["F&SW"]; PWused = Res["PW"];
+
+                foreach (var task in Task_on)
+                {
+                    if (task.FT <= TimeNow)
+                    {
+                        foreach (var res in task.Res_name)
+                        {
+                            Res[res] = Res[res] + task.Res_require[res];
+                        }
+                        task.State = false;
+                        Task_end.Add(task);
+                    }
+                }
+                Task_on = Task_on.Except(Task_end).ToList();
+                if (Task_on == null) { Task_on = new List<Task>(); }
+                    //Console.WriteLine(Task_on.Count().ToString());
+
+                foreach (var task in Task_pre)
+                {
+                    bool pre_done;
+                    if (task.Pretask.All(p => p != null))
+                    {
+                        pre_done = task.Pretask.All(pre => Task_end.Any(a => a == pre));//任务前置完成
+                        //Console.WriteLine("every item in predone isn't null");
+                    }
+                    else
+                    {
+                        pre_done = true;
+                        //Console.WriteLine("every item inpredone is null!!!!!!!!!!");
+                    }
+                    //Console.WriteLine("predone{0},{1}",task.ID,pre_done.ToString());
+                    bool res_avail = task.Res_name.All(res => Res[res] - task.Res_require[res] >= 0);
+                    //Console.WriteLine("resavail{0},{1}", task.ID, res_avail.ToString());
+                    bool space_avil;
+
+                    if (Task_on.Count ==0 )
+                    {
+                        space_avil = true;
+                    }
+                    else
+                    {
+                        space_avil = Task_on.All(t =>
+                        Math.Sqrt((t.Point[0] - task.Point[0]) * (t.Point[0] - task.Point[0]) + (t.Point[1] - task.Point[1]) * (t.Point[1] - task.Point[1]))
+                        >= (t.Radius + task.Radius));
+                    }
+                    //Console.WriteLine("spaceavail{0},{1}", task.ID, space_avil.ToString());
+                    //Console.WriteLine("predone {0},resavail {1}, spaceavail {2}, ID:{3}", pre_done.ToString(), res_avail.ToString(), space_avil.ToString(), task.ID.ToString());
+
+                    if (pre_done && res_avail && space_avil) 
+                    {
+                        foreach (var res in task.Res_name)
+                        {
+                            Res[res] = Res[res] - task.Res_require[res];
+                        }
+                        task.State = true;
+                        task.ST = TimeNow;
+                        task.FT = task.ST + task.D;
+                        Task_on.Add(task);
+                        //Console.WriteLine("{0},{1}", task.ID, task.ST);
+
+                    }
+                    
+                }
+                Task_pre = Task_pre.Except(Task_on).ToList();
+                if(Task_pre == null) { break; }
+
+                string TimeNow_str = TimeNow.ToDateTimeUtc().Hour.ToString() + ":" + TimeNow.ToDateTimeUtc().Minute.ToString();
+                if (TCused != Res["TC"])
+                {
+                    Res_usage["TC"].Add(TCused); Res_usage["TC"].Add(Res["TC"]);
+                    Res_time["TC"].Add(TimeNow_str); Res_time["TC"].Add(TimeNow_str);
+                }
+                if (PCWused != Res["PCW"])
+                {
+                    Res_usage["PCW"].Add(PCWused); Res_usage["PCW"].Add(Res["PCW"]);
+                    Res_time["PCW"].Add(TimeNow_str); Res_time["PCW"].Add(TimeNow_str);
+                }
+                if (RWused != Res["RW"])
+                {
+                    Res_usage["RW"].Add(RWused); Res_usage["RW"].Add(Res["RW"]);
+                    Res_time["RW"].Add(TimeNow_str); Res_time["RW"].Add(TimeNow_str);
+                }
+                if (PWused != Res["PW"])
+                {
+                    Res_usage["PW"].Add(PWused); Res_usage["PW"].Add(Res["PW"]);
+                    Res_time["PW"].Add(TimeNow_str); Res_time["PW"].Add(TimeNow_str);
+                }
+                if (FSWused != Res["F&SW"])
+                {
+                    Res_usage["F&SW"].Add(FSWused); Res_usage["F&SW"].Add(Res["F&SW"]);
+                    Res_time["F&SW"].Add(TimeNow_str); Res_time["F&SW"].Add(TimeNow_str);
+                }
+            }
+            for (int i = 0; i < Row; i++) //导出任务开始、结束时间
+            {
+                var st = Task_end[i].ST.ToDateTimeUtc();
+               //var ft = Task_end[i].FT.ToDateTimeUtc();
+                var st_string = st.Year.ToString()+ "/" + st.Month.ToString()+"/"+st.Day +" "+st.Hour.ToString()+":"+st.Minute.ToString();
+                //var ft_string = ft.Year.ToString()+ "/" + ft.Month.ToString()+"/"+ft.Day +" "+ft.Hour.ToString()+":"+ft.Minute.ToString();
+                Console.WriteLine(st_string);
+            }
+            Console.WriteLine("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            for (int i = 0; i < Row; i++) //导出任务开始、结束时间
+            {
+                //var id = Task_end[i].ID;
+                //var st = Task_end[i].ST.ToDateTimeUtc();
+                var ft = Task_end[i].FT.ToDateTimeUtc();
+                //var st_string = st.Year.ToString() + "/" + st.Month.ToString() + "/" + st.Day + " " + st.Hour.ToString() + ":" + st.Minute.ToString();
+                var ft_string = ft.Year.ToString() + "/" + ft.Month.ToString() + "/" + ft.Day + " " + ft.Hour.ToString() + ":" + ft.Minute.ToString();
+                Console.WriteLine(ft_string);
+            }
+            Console.WriteLine("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            for (int i = 0; i < Row; i++) //导出任务开始、结束时间
+            {
+                var id = Task_end[i].ID;
+                //var st = Task_end[i].ST.ToDateTimeUtc();
+                //var ft = Task_end[i].FT.ToDateTimeUtc();
+                //var st_string = st.Year.ToString() + "/" + st.Month.ToString() + "/" + st.Day + " " + st.Hour.ToString() + ":" + st.Minute.ToString();
+                //var ft_string = ft.Year.ToString() + "/" + ft.Month.ToString() + "/" + ft.Day + " " + ft.Hour.ToString() + ":" + ft.Minute.ToString();
+                Console.WriteLine(id);
+            }
+            Console.WriteLine("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+
+            foreach (var item in Res_usage["PCW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            foreach (var item in Res_time["PCW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            Console.WriteLine("PCW\\\\PCW\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            foreach (var item in Res_usage["RW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            foreach (var item in Res_time["RW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            Console.WriteLine("RW\\\\RW\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            foreach (var item in Res_usage["PW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            foreach (var item in Res_time["PW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            Console.WriteLine("PW\\\\PW\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            foreach (var item in Res_usage["F&SW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            foreach (var item in Res_time["F&SW"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            Console.WriteLine("F&SW\\\\F&SW\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            foreach (var item in Res_usage["TC"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            foreach (var item in Res_time["TC"]) //导出TC资源的利用情况
+            {
+                string itemstr = item.ToString();
+                Console.WriteLine(itemstr);
+            }
+            Console.WriteLine("TC\\\\TC\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            Console.ReadLine();
+            //using (FileStream fileStream = File.Open("Schedule.xlsx", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            //{
+            //    workbook.Write(fileStream);
+            //}
+
+
+            //using (var stream = File.Create("Scheduleing.xlsx"))
+            //{
+            //    workbook.Write(stream);
+            //    stream.Close();
+            //}
+        }
+    }
+
+    class Task
+    {
+        public string ID { get; set; }
+        public Instant ST { get; set; } // Start time
+        public Instant FT { get; set; }
+        public Duration D { get; set; }
+        public Boolean State { get; set; }
+        public int[] Point { get; set; }
+        public string[] Pre { get; set; } //这个还是设置成数组把
+        public List<Task> Pretask { get; set; }
+        public string [] Res_name { get; set; }
+        public Dictionary<string, int> Res_require { get; set; }
+        public int Radius { get; set; }
+    }
+}

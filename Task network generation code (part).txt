@@ -1,0 +1,130 @@
+ class Program
+    {
+        static void Main(string[] args)
+        {
+            const string fileName = "现浇装配式案例模型,简化.V2.ifc";
+            var editor = new XbimEditorCredentials
+            {
+                ApplicationDevelopersName = "xBIM Team",
+                ApplicationFullName = "xBIM Toolkit",
+                ApplicationIdentifier = "xBIM",
+                ApplicationVersion = "4.0",
+                EditorsFamilyName = "Liu",
+                EditorsGivenName = "Bobo",
+                EditorsOrganisationName = "4DBIM simultion"
+            };
+            using (var model = IfcStore.Open(fileName,editor))
+            {
+                using (var tnx = model.BeginTransaction("4DBIM")) //所有的4D创建操作应在此进行
+                {
+                    var project = model.Instances.OfType<IfcProject>().FirstOrDefault();
+                    var Building = model.Instances.OfType<IfcBuilding>().FirstOrDefault();
+                    var Floor1 = model.Instances.OfType<IfcBuildingStorey>().Where(F => F.Name.ToString() == "1F").Select(F => F).FirstOrDefault();
+                    Console.WriteLine(Floor1.Name.ToString());
+                    var allEleinFloor1 = Floor1.ContainsElements.SelectMany(E => E.RelatedElements);
+
+                    //获取文件中的资源实体.raf
+                    var TowerCrane_raf = allEleinFloor1.Where(e => e.Name.ToString().Contains("塔吊")).Select(e => e).ToList();
+                    Console.WriteLine(TowerCrane_raf.FirstOrDefault().Name.ToString());
+                    var PCYard_raf = allEleinFloor1.Where(e => e.Name.ToString().Contains("预制构件堆场")).Select(e => e).ToList();
+                    var RebarYard_raf = allEleinFloor1.Where(e => e.Name.ToString().Contains("钢筋堆场")).Select(e => e).ToList();
+                    var FormYard_raf = allEleinFloor1.Where(e => e.Name.ToString().Contains("模板堆场")).Select(e => e).ToList();
+                    var MortarYard_raf = allEleinFloor1.Where(e => e.Name.ToString().Contains("砂石堆场")).Select(e => e).ToList();
+
+                    //生成该项目所具备的所有班组和材料资源
+                    //定义各类资源
+                    var TC = model.Instances.New<IfcConstructionEquipmentResource>(E => E.Name = "Tower Crane");
+                    model.Instances.New<IfcRelAssignsToResource>(R =>
+                    {
+                        R.RelatingResource = TC;
+                        R.RelatedObjects.AddRange(TowerCrane_raf);
+                    });
+                   
+                    var Material_HIPCW = model.Instances.New<IfcConstructionMaterialResource>(M => M.Name = "Precast Wall Material Resources");
+                    model.Instances.New<IfcRelAssignsToResource>(R =>
+                    {
+                        R.RelatingResource = Material_HIPCW;
+                        R.RelatedObjects.AddRange(PCYard_raf);
+                    });
+
+                    var Material_G = model.Instances.New<IfcConstructionMaterialResource>(M => M.Name = "Grouting Material Resources");
+                    model.Instances.New<IfcRelAssignsToResource>(R =>
+                    {
+                        R.RelatingResource = Material_G;
+                        R.RelatedObjects.AddRange(MortarYard_raf);
+                    });
+
+                    var Material_HR = model.Instances.New<IfcConstructionMaterialResource>(M => M.Name = "Hoist Rebars Material Resources");
+                    model.Instances.New<IfcRelAssignsToResource>(R =>
+                    {
+                        R.RelatingResource = Material_HR;
+                        R.RelatedObjects.AddRange(RebarYard_raf);
+                    });
+
+                    var Material_TF = model.Instances.New<IfcConstructionMaterialResource>(M => M.Name = "Transport Forms Material Resources");
+                    model.Instances.New<IfcRelAssignsToResource>(R =>
+                    {
+                        R.RelatingResource = Material_TF;
+                        R.RelatedObjects.AddRange(FormYard_raf);
+                    });
+
+                    var Material_PC = model.Instances.New<IfcConstructionMaterialResource>(M => M.Name = "Pour Concrete Material Resources");
+                    model.Instances.New<IfcRelAssignsToResource>(R =>
+                    {
+                        R.RelatingResource = Material_TF;
+                        R.RelatedObjects.AddRange(MortarYard_raf);
+                    });
+
+                    var PCW = model.Instances.New<IfcLaborResource>(M => M.Name = "Precast Wall Installation Workers");
+               
+
+
+                    //定义task type,关联施工资源以及propety set
+                    //定义HR任务类型
+                    IfcTaskType HR = model.Instances.New<IfcTaskType>(t => t.Name = "Hoist Rebar");
+                    //定义它的propety set
+                    var Pset_HR = model.Instances.New<IfcPropertySet>(ps => " Note!!! This part is not available"
+
+                    //将task type与propety set连接
+                    model.Instances.New<IfcRelDefinesByProperties>(r => { r.RelatedObjects.Add(HR); r.RelatingPropertyDefinition = Pset_HR; });
+                    HR.HasPropertySets.Add(Pset_HR);
+                    //将task type与施工资源关联  " Note!!! This part is not available"
+
+
+                    //对标准(3F)层，获取构件
+                    var allFloor = Building.IsDecomposedBy.SelectMany(f => f.RelatedObjects);
+                    foreach (var F in allFloor)
+                    {
+                        Console.WriteLine(F.Name.ToString());
+                    }
+                    var Floor3 = model.Instances.OfType<IfcBuildingStorey>().Where(F => F.Name.ToString() == "3F").Select(F => F).FirstOrDefault();
+    
+                    //对PC墙生成任务  " Note!!! This part is not available"
+
+                        //将任务与构件关联
+                        model.Instances.New<IfcRelAssignsToProduct>(Rel =>
+                        {
+                            Rel.RelatingProduct = PCWall; Rel.RelatedObjects.Add(HItask); Rel.RelatedObjects.Add(Gtask); Rel.RelatedObjects.Add(HStask);
+                        });
+
+                        //定义任务间的逻辑关系 " Note!!! This part is not available"
+
+
+
+                    //将低层级任务归入上一层级任务集合中
+                    WBS_Story.Add(WBS_Walltask); WBS_Story.Add(MC_DJtask); WBS_Story.Add(MC_DMtask); WBS_Story.Add(MC_JZtask);
+                    var WBS_Storytask = model.Instances.New<IfcTask>(T => T.Name = "层(区域)总施工");
+                    model.Instances.New<IfcRelNests>(Rel => { Rel.RelatingObject = WBS_Storytask; Rel.RelatedObjects.AddRange(WBS_Story); });
+
+                    // 声明进度计划关联任务，并将计划关联至项目
+                    var Schedule = model.Instances.New<IfcWorkSchedule>(S => { S.Name = "标准层施工进度"; S.Purpose = "管理标准层所有施工任务"; });
+                    model.Instances.New<IfcRelAssignsToControl>(Rel => { Rel.RelatingControl = Schedule; Rel.RelatedObjects.Add(WBS_Storytask); });
+                    model.Instances.New<IfcRelDeclares>(Rel => { Rel.RelatingContext = project; Rel.RelatedDefinitions.Add(Schedule); });
+
+                    tnx.Commit();
+                }
+
+                model.SaveAs("现浇装配式案例模型,简化+场布_modified2.ifc");
+            }
+        }
+    }
